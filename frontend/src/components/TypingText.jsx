@@ -1,30 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
-export default function TypingText({ text, speed = 15 }) {
+export default function TypingText({ text, speed = 30 }) {
     const [displayedText, setDisplayedText] = useState("");
     const [isMuted, setIsMuted] = useState(false);
     const index = useRef(0);
     const utteranceRef = useRef(null);
-    const hasStarted = useRef(false);
 
+    // Typing Effect
+    // Typing Effect
     useEffect(() => {
         setDisplayedText("");
         index.current = 0;
-        hasStarted.current = false;
         
-        // Initial Speech Start
-        if (!isMuted) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.05; // slightly faster to match decent reading speed
-            utteranceRef.current = utterance;
-            window.speechSynthesis.speak(utterance);
-            hasStarted.current = true;
-        }
+        if (!text) return; // 🛡️ Early exit if no text
 
         const intervalId = setInterval(() => {
-            if (index.current < text.length) {
+            if (text && index.current < text.length) {
                 setDisplayedText((prev) => prev + text.charAt(index.current));
                 index.current += 1;
             } else {
@@ -32,28 +24,26 @@ export default function TypingText({ text, speed = 15 }) {
             }
         }, speed);
 
-        return () => {
-            clearInterval(intervalId);
-            window.speechSynthesis.cancel();
-        };
-    }, [text]); // re-run if text changes
+        return () => clearInterval(intervalId);
+    }, [text, speed]);
+
+    // Voice Sync Effect
+    useEffect(() => {
+        if (!text || isMuted) return;
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utteranceRef.current = utterance;
+        
+        window.speechSynthesis.speak(utterance);
+
+        return () => window.speechSynthesis.cancel();
+    }, [text, isMuted]);
 
     const toggleMute = () => {
-        const nextMuted = !isMuted;
-        setIsMuted(nextMuted);
-        if (nextMuted) {
-            window.speechSynthesis.cancel();
-        } else {
-            // Unmuting: speak from the remaining text
-            const remaining = text.substring(index.current);
-            if (remaining.length > 0) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(remaining);
-                utterance.rate = 1.05;
-                utteranceRef.current = utterance;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
+        setIsMuted(prev => !prev);
     };
 
     return (
@@ -71,7 +61,7 @@ export default function TypingText({ text, speed = 15 }) {
                 {displayedText.split('\n\n').map((para, idx) => (
                     <p key={idx} className="text-slate-300 leading-relaxed font-light">{para}</p>
                 ))}
-                {index.current < text.length && (
+                {text && index.current < text.length && (
                     <span className="inline-block w-2 h-5 bg-primary-500 animate-pulse ml-1 align-middle"></span>
                 )}
             </div>

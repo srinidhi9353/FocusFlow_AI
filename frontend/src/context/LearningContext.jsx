@@ -1,16 +1,24 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const LearningContext = createContext();
 
 export function LearningProvider({ children }) {
-    // Current session state
-    const [session, setSession] = useState({
-        topic: '',
-        content: '',
-        mode: 'text', // 'text', 'visual', 'quiz', 'revision'
-        score: null,
-        history: []
+    // Current session state with initial hydration from localStorage
+    const [session, setSession] = useState(() => {
+        const saved = localStorage.getItem('focusflow_session');
+        return saved ? JSON.parse(saved) : {
+            topic: '',
+            content: '',
+            mode: 'text',
+            score: null,
+            history: []
+        };
     });
+
+    // Automatically sync with localStorage whenever session changes
+    useEffect(() => {
+        localStorage.setItem('focusflow_session', JSON.stringify(session));
+    }, [session]);
 
     const startSession = (topic, content = '', mode = 'text') => {
         setSession({
@@ -27,13 +35,15 @@ export function LearningProvider({ children }) {
     };
 
     const endSession = () => {
-        setSession({
+        const reset = {
             topic: '',
             content: '',
             mode: 'text',
             score: null,
             history: []
-        });
+        };
+        setSession(reset);
+        localStorage.removeItem('focusflow_session');
     };
 
     return (

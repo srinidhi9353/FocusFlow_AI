@@ -22,7 +22,10 @@
 - **🔎 Intelligent AI Search:** Quickly locate topics, summaries, and complex concepts on the fly.
 - **📹 Distraction-Free Video Learning:** Embedded YouTube video learning tailored to keep you entirely focused.
 - **🔐 User Authentication:** Secure, quick access using local storage based authentication.
-- **📊 Interactive Dashboard:** Resume learning seamlessly from where you left off via your personalized dashboard.
+- **🤖 Integrated AI Chat Assistant:** A floating chatbot accessible on every page for real-time Q&A and study support.
+- **💾 Smart Session Persistence:** Automatic saving and resuming of progress using `localStorage` hydration.
+- **🎞️ Modal Video Explanations:** On-demand, distraction-free YouTube tutorials in a modal overlay.
+- **📊 Interactive Dashboard:** Resume learning seamlessly with a "Continue" button that restores your exact state.
 
 ---
 
@@ -45,7 +48,9 @@ The system is designed with a seamless, modular flow ensuring low latency and hi
 2. **Backend Processing:** Node/Express Backend processes the request, parsing files if necessary.
 3. **AI Generation:** The backend queries the **Groq API** to generate the educational content, quizzes, or adaptive steps.
 4. **Adaptive Engine Logic:** Based on quiz performance, the engine determines if the student needs a simpler explanation or a visual learning mode.
-5. **Client Response:** The frontend receives the payload, triggering typed animations and Web Speech voices concurrently.
+5. **[NEW] Reteach & Adapt:** For mid-range scores, the AI reteaches using analogies; for low scores, it pivots to Visual Mode.
+6. **[NEW] Session Hydration:** App state is persisted across refreshes, allowing the user to resume instantly.
+7. **Client Response:** The frontend receives the payload, triggering typed animations and Web Speech voices concurrently.
 
 ---
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLearning } from '../context/LearningContext';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CheckCircle2, ArrowRight, PlayCircle, RefreshCcw } from 'lucide-react';
+import { LayoutDashboard, CheckCircle2, ArrowRight, PlayCircle, RefreshCcw, ChevronLeft } from 'lucide-react';
 
 export default function RevisionPanel() {
     const { session, updateSession } = useLearning();
@@ -53,12 +53,19 @@ export default function RevisionPanel() {
 
                 <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12">
                     <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100">
+                        <button 
+                            onClick={() => navigate('/dashboard')}
+                            className="p-3 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+                            title="Back to Dashboard"
+                        >
+                            <ChevronLeft className="w-6 h-6" />
+                        </button>
                         <div className="h-16 w-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
                             <CheckCircle2 className="w-8 h-8" />
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-slate-800">Revision Summary</h1>
-                            <p className="text-slate-500 mt-1">Key takeaways for {session.topic || 'your recent lesson'}</p>
+                            <p className="text-slate-500 mt-1">Key takeaways for {session?.topic || 'your recent lesson'}</p>
                         </div>
                     </div>
 

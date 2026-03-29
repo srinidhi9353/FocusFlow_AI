@@ -1,19 +1,25 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play, Clock, BarChart3, BookOpen, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { Play, Clock, BarChart3, BookOpen, Lightbulb, CheckCircle2, Brain, ArrowRight } from 'lucide-react';
+import { useLearning } from '../context/LearningContext';
 
 export default function Dashboard() {
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    const { session } = useLearning();
 
     const progress = user?.progress || {
         lastTopic: '',
         lastLearningMode: 'text',
         completedTopics: []
     };
+    
+    // Check both auth progress and live session context
+    const lastTopic = session.topic || progress.lastTopic;
+    const hasHistory = lastTopic !== '';
 
-    const hasHistory = progress.lastTopic !== '';
     const mockCompleted = progress.completedTopics.length > 0 ? progress.completedTopics : [
         { title: 'Photosynthesis Basics', score: 85, date: '2 days ago' },
         { title: 'Intro to Quantum Computing', score: 92, date: '1 week ago' },
@@ -98,16 +104,16 @@ export default function Dashboard() {
                                         In Progress
                                     </span>
                                     <h3 className="text-2xl font-bold text-slate-800 mb-2">
-                                        {progress.lastTopic}
+                                        {lastTopic}
                                     </h3>
                                     <p className="text-slate-500 mb-6 leading-relaxed">
-                                        You were last learning using the <span className="font-semibold text-slate-700">{progress.lastLearningMode}</span> mode. Ready to pick up where you left off?
+                                        You were last learning using the <span className="font-semibold text-slate-700">{session.mode || 'text'}</span> mode. Ready to pick up where you left off?
                                     </p>
                                     <button
                                         onClick={() => navigate('/focus')}
                                         className="flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition"
                                     >
-                                        Continue <ArrowRight className="w-4 h-4" />
+                                        Continue <ArrowRight size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -161,11 +167,4 @@ export default function Dashboard() {
     );
 }
 
-// Arrow icon for the inline button
-function ArrowRight(props) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-    );
-}
+// End of Dashboard component

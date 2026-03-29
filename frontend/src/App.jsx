@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import FloatingChatbot from './components/FloatingChatbot';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
@@ -26,6 +27,7 @@ function App() {
             <Route path="/revision" element={<ProtectedRoute><RevisionPanel /></ProtectedRoute>} />
           </Routes>
         </main>
+        <FloatingChatbot />
       </div>
     </BrowserRouter>
   );

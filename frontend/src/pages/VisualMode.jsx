@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLearning } from '../context/LearningContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Video, ArrowLeft, Headphones, FileText, CheckCircle2 } from 'lucide-react';
+import { Video, ArrowLeft, Headphones, FileText, CheckCircle2, ChevronLeft } from 'lucide-react';
 import TypingText from '../components/TypingText';
 
 export default function VisualMode() {
@@ -62,6 +62,10 @@ export default function VisualMode() {
         navigate('/focus');
     };
 
+    const goToDashboard = () => {
+        navigate('/dashboard');
+    };
+
     const handleReadyForQuiz = () => {
         navigate('/quiz');
     };
@@ -72,13 +76,21 @@ export default function VisualMode() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
-                    <button
-                        onClick={handleReturn}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition group"
-                    >
-                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        Back to Text Mode
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={goToDashboard}
+                            className="p-2 bg-slate-900 border border-slate-800 rounded-xl hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <button
+                            onClick={handleReturn}
+                            className="flex items-center gap-2 text-slate-400 hover:text-white transition group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                            Back to Text Mode
+                        </button>
+                    </div>
 
                     <div className="px-4 py-1.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-sm font-medium flex items-center gap-2">
                         <Video className="w-4 h-4" /> Visual Learning Active
@@ -141,7 +153,7 @@ export default function VisualMode() {
                         </div>
 
                         <div className="mt-12 pt-8 border-t border-slate-800">
-                            <p className="text-sm text-slate-500 mb-4 text-center">Ready to test your knowledge again?</p>
+                            <p className="text-sm text-slate-500 mb-4 text-center">Ready to test your knowledge again for {session?.topic || 'this topic'}?</p>
                             <button
                                 onClick={handleReadyForQuiz}
                                 className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-500 transition-colors shadow-lg shadow-primary-500/20"

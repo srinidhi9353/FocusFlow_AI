@@ -5,7 +5,8 @@ const aiService = require('../services/aiService');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const fs = require('fs');
+const upload = multer({ dest: 'uploads/' });
 
 // Auth Routes
 router.post('/auth/signup', (req, res) => {
@@ -22,36 +23,46 @@ router.post('/auth/login', (req, res) => {
 
 // File Parsing Route
 router.post('/upload', upload.single('file'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
     try {
-        const data = await pdfParse(req.file.buffer);
-        let text = data.text;
-        
-        // Summarize if large (mock logic: truncating for basic safety, passing to explanation)
-        if (text.length > 5000) {
-            text = text.substring(0, 5000) + "...";
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
         }
 
-        // Just sending the text directly to the explainer logic makes it dynamic
+        const dataBuffer = fs.readFileSync(req.file.path);
+        const pdfData = await pdfParse(dataBuffer);
+
+        let text = pdfData.text;
+
+        // 🧠 CLEAN TEXT (VERY IMPORTANT)
+        text = text.replace(/\s+/g, " ").trim();
+
+        if (!text || text.length < 50) {
+            return res.status(400).json({ error: "PDF content too short" });
+        }
+
+        // 🚀 LIMIT TEXT (Groq input safe)
+        const trimmedText = text.substring(0, 3000);
+
         const topicName = req.file.originalname.replace(/\.[^/.]+$/, "");
-        const content = await aiService.generateExplanation(`the following text from ${topicName}: \n${text}`);
-        
+        const content = await aiService.generateExplanation(`the following content from ${topicName}:\n\n${trimmedText}`);
+
+        fs.unlinkSync(req.file.path); // cleanup
+
         res.json({ success: true, topic: topicName, content, mode: 'text' });
     } catch (e) {
-        console.error("PDF Parse error", e);
-        res.status(500).json({ error: 'Failed to process document' });
+        console.error("PDF Parse error", e.stack || e);
+        console.error("File details:", req.file);
+        res.status(500).json({ error: 'Failed to process document', details: e.message });
     }
 });
 
 // Groq Generation Route
 router.post('/ai/explain', async (req, res) => {
-    const { topic } = req.body;
+    const { topic, style } = req.body;
     if (!topic) return res.status(400).json({ error: 'Topic is required' });
 
     try {
-        const content = await aiService.generateExplanation(topic);
+        const content = await aiService.generateExplanation(topic, style);
         res.json({ topic, content, mode: 'text' });
     } catch (error) {
         console.error('Groq Error:', error);
@@ -130,6 +141,25 @@ router.get('/youtube/search', async (req, res) => {
     } catch (error) {
         console.error('YouTube API Error:', error?.message);
         res.status(500).json({ error: 'Failed to fetch video' });
+    }
+});
+
+// Groq Chat Assistant Route
+router.post('/ai/chat', async (req, res) => {
+    const { message, context } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message is required' });
+
+    try {
+        const prompt = `You are an AI learning assistant for FocusFlow. 
+The student is currently learning about: ${context || 'General Topics'}.
+Answer their question clearly, concisely, and encouragingly.
+Question: ${message}`;
+
+        const response = await aiService.generateExplanation(prompt); // Reusing general explanation logic for chat
+        res.json({ reply: response });
+    } catch (error) {
+        console.error('Groq Chat Error:', error);
+        res.status(500).json({ reply: "I'm sorry, I'm having trouble processing that right now." });
     }
 });
 

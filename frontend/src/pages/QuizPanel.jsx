@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLearning } from '../context/LearningContext';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { ChevronRight, HelpCircle } from 'lucide-react';
+import { ChevronRight, HelpCircle, ChevronLeft } from 'lucide-react';
 
 export default function QuizPanel() {
     const { session, updateSession } = useLearning();
@@ -134,23 +134,29 @@ export default function QuizPanel() {
             <div className="flex-1 bg-slate-50 min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-slate-500 font-medium">Generating your personalized quiz...</p>
+                    <p className="text-slate-500 font-medium">Generating your personalized quiz for {session?.topic || 'topic'}...</p>
                 </div>
             </div>
         );
     }
 
-    const currentQuestionData = questions[currentQ];
+    const currentQuestionData = questions?.[currentQ];
 
     return (
         <div className="flex-1 bg-slate-50 min-h-screen py-10 px-4">
             <div className="max-w-3xl mx-auto">
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center p-3 bg-indigo-100 text-indigo-600 rounded-2xl mb-4">
-                        <HelpCircle className="w-8 h-8" />
+                <div className="flex items-center gap-4 mb-10">
+                    <button 
+                        onClick={() => navigate('/dashboard')}
+                        className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors shadow-sm text-slate-400 hover:text-slate-600"
+                        title="Back to Dashboard"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <div className="text-left">
+                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Knowledge Check</h1>
+                        <p className="text-slate-500 mt-1">Let's see what you remember about {session?.topic || 'this topic'}</p>
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-800">Knowledge Check</h1>
-                    <p className="text-slate-500 mt-2">Let's see what you remember about {session.topic}</p>
                 </div>
 
                 <motion.div
@@ -176,12 +182,12 @@ export default function QuizPanel() {
                                     Question {currentQ + 1} of {questions.length}
                                 </span>
                                 <h2 className="text-2xl font-semibold text-slate-800 leading-snug">
-                                    {currentQuestionData.question}
+                                    {currentQuestionData?.question || "Loading question..."}
                                 </h2>
                             </div>
 
                             <div className="space-y-3">
-                                {currentQuestionData.options.map((opt, idx) => {
+                                {currentQuestionData?.options?.map((opt, idx) => {
                                     const isSelected = selectedAnswers[currentQ] === idx;
                                     return (
                                         <button
